@@ -10,61 +10,61 @@ $oauthConfig = array(
     'consumerKey' => ZishinConst::CONSUMER_KEY,
     'consumerSecret' => ZishinConst::CONSUMER_SECRET
 );
- 
+
 $method = 'POST'; //(0)
- 
+
 $nonce =  md5(uniqid(rand(), true));
- 
+
 $timestamp = time();
- 
+
 $authorization = array(
     'oauth_nonce' => $nonce,
     'oauth_signature_method' => 'HMAC-SHA1',
     'oauth_timestamp' => $timestamp,
     'oauth_consumer_key' => $oauthConfig['consumerKey'],
     'oauth_version' => '1.0'
-    );
- 
+);
+
 if($oauthConfig['callbackUrl']){
     $authorization['oauth_callback'] = $oauthConfig['callbackUrl'];
 }else{
     $authorization['oauth_callback'] = 'oob';
 }
- 
+
 ksort($authorization);
- 
+
 $signatureBaseString = '';
 foreach($authorization as $key => $val){
     $signatureBaseString .= $key . '=' . rawurlencode($val) . '&';
 }
 $signatureBaseString = substr($signatureBaseString,0,-1);
 $signatureBaseString = $method . '&' .
-                        rawurlencode($oauthConfig['requestTokenUrl']) . '&' .
-                        rawurlencode($signatureBaseString);
- 
+    rawurlencode($oauthConfig['requestTokenUrl']) . '&' .
+    rawurlencode($signatureBaseString);
+
 $signingKey = rawurlencode($oauthConfig['consumerSecret']) . '&';
- 
+
 $authorization['oauth_signature'] =
     base64_encode(hash_hmac('sha1',$signatureBaseString,$signingKey,true));
- 
-//ª‚±‚±‚Ü‚Å‚ÍGET‚ªPOST‚É‚È‚éˆÈŠO‚Í‘O‰ñ‚Æ“¯‚¶---------------------------------
+
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚Å‚ï¿½GETï¿½ï¿½POSTï¿½É‚È‚ï¿½ÈŠOï¿½Í‘Oï¿½ï¿½Æ“ï¿½ï¿½ï¿½---------------------------------
 /**
- * (1)ƒŠƒNƒGƒXƒgƒg[ƒNƒ“‚ğæ“¾‚·‚é‚½‚ß‚Ìhttpƒwƒbƒ_‚ğì¬
- * GET‚Åæ“¾‚µ‚½‚Æ‚«‚Æ‚Ù‚Ú“¯‚¶‚¾‚ªA’l‚ªƒ_ƒuƒ‹ƒNƒH[ƒe[ƒVƒ‡ƒ“‚ÅˆÍ‚Ü‚ê‚ÄA
- * ƒJƒ“ƒ}‚Å‹æØ‚ç‚ê‚Ä‚¢‚é
+ * (1)ï¿½ï¿½ï¿½Nï¿½Gï¿½Xï¿½gï¿½gï¿½[ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½é‚½ï¿½ß‚ï¿½httpï¿½wï¿½bï¿½_ï¿½ï¿½ï¿½ì¬
+ * GETï¿½Åæ“¾ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½ï¿½Æ‚Ù‚Ú“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½lï¿½ï¿½ï¿½_ï¿½uï¿½ï¿½ï¿½Nï¿½Hï¿½[ï¿½eï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ÅˆÍ‚Ü‚ï¿½ÄA
+ * ï¿½Jï¿½ï¿½ï¿½}ï¿½Å‹ï¿½Ø‚ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½
  */
 $oauthHeader = 'OAuth ';
 foreach($authorization as $key => $val){
     $oauthHeader .= $key . '="' . rawurlencode($val) .'",';
 }
 $oauthHeader = substr($oauthHeader,0,-1);
- 
+
 /**
- * (2)curl‚ğg—p‚µ‚ÄPOST‚ÅƒŠƒNƒGƒXƒgƒg[ƒNƒ“‚ğæ“¾B
- * POST‚Åæ‚Ù‚Çì¬‚µ‚½ƒwƒbƒ_‚Å’ÊM‚µ‚Ä‚¢‚é‚¾‚¯‚¾‚ªAƒfƒtƒHƒ‹ƒgİ’è‚Ì‚Ü‚Ü‚¾‚Æ
- * Content-Length: -1,Expect: 100-continue‚ğƒwƒbƒ_‚É‚Â‚¯‚é‚±‚Æ‚ª‚ ‚èA
- * ‚»‚¤‚·‚é‚Ætwitter‚ÌƒT[ƒo[‚ª413 Request Entity Too Large,
- * 417 Expectation Failed‚ÌƒGƒ‰[‚ğ‚Í‚­‚Ì‚Å“ñ‚Â‚Ìƒwƒbƒ_‚ÍÁ‚µ‚Ä‚ ‚é
+ * (2)curlï¿½ï¿½ï¿½gï¿½pï¿½ï¿½ï¿½ï¿½POSTï¿½Åƒï¿½ï¿½Nï¿½Gï¿½Xï¿½gï¿½gï¿½[ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½æ“¾ï¿½B
+ * POSTï¿½Åï¿½Ù‚Çì¬ï¿½ï¿½ï¿½ï¿½ï¿½wï¿½bï¿½_ï¿½Å’ÊMï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½fï¿½tï¿½Hï¿½ï¿½ï¿½gï¿½İ’ï¿½Ì‚Ü‚Ü‚ï¿½ï¿½ï¿½
+ * Content-Length: -1,Expect: 100-continueï¿½ï¿½ï¿½wï¿½bï¿½_ï¿½É‚Â‚ï¿½ï¿½é‚±ï¿½Æ‚ï¿½ï¿½ï¿½ï¿½ï¿½A
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½twitterï¿½ÌƒTï¿½[ï¿½oï¿½[ï¿½ï¿½413 Request Entity Too Large,
+ * 417 Expectation Failedï¿½ÌƒGï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½Í‚ï¿½ï¿½Ì‚Å“ï¿½Â‚Ìƒwï¿½bï¿½_ï¿½Íï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½
  */
 $curl = curl_init();
 curl_setopt($curl, CURLOPT_URL, $oauthConfig['requestTokenUrl']);
@@ -74,21 +74,21 @@ curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-    'Authorization :' . $oauthHeader,
-    'Content-Length:',
-    'Expect:',
-    'Content-Type:')
+        'Authorization :' . $oauthHeader,
+        'Content-Length:',
+        'Expect:',
+        'Content-Type:')
 );
 curl_setopt($curl, CURLOPT_POST, true);
 $response = curl_exec($curl);
 
 var_dump($response);
- 
+
 /**
- * (3)curl‚ªg‚¦‚È‚¢ŠÂ‹«‚à‚ ‚é‚Ì‚ÅŠÈ’P‚É‘‚¢‚½ƒXƒgƒŠ[ƒ€‚ÅÚ‘±‚·‚éƒ\[ƒX‚à
- * ‚Â‚¯‚Ä‚¨‚­B
+ * (3)curlï¿½ï¿½ï¿½gï¿½ï¿½ï¿½È‚ï¿½ï¿½Â‹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚ÅŠÈ’Pï¿½Éï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Xï¿½gï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ÅÚ‘ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½[ï¿½Xï¿½ï¿½
+ * ï¿½Â‚ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½B
  */
- 
+
 /*
 $fp = stream_socket_client("ssl://api.twitter.com:443", $errno, $errstr, 30);
 fwrite($fp, "POST /oauth/request_token HTTP/1.0\r\nHost: api.twitter.com\r\n"
@@ -100,21 +100,21 @@ while (!feof($fp)) {
 fclose($fp);
 $response = substr($response,strpos($response,"\r\n\r\n") + 4);
 */
- 
+
 $requestToken = array();
 foreach(explode('&',$response) as $v){
     $param = explode('=',$v);
     $requestToken[$param[0]] = $param[1];
 }
- 
+
 /**
- * (4)ƒŠƒNƒGƒXƒgƒg[ƒNƒ“‚Í‚±‚ÌŒã‚Ìˆ—‚Å•K—v‚È‚Ì‚ÅƒZƒbƒVƒ‡ƒ“‚ÉŠi”[‚µ‚Ä‚¨‚­B
+ * (4)ï¿½ï¿½ï¿½Nï¿½Gï¿½Xï¿½gï¿½gï¿½[ï¿½Nï¿½ï¿½ï¿½Í‚ï¿½ï¿½ÌŒï¿½Ìï¿½ï¿½ï¿½ï¿½Å•Kï¿½vï¿½È‚Ì‚ÅƒZï¿½bï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ÉŠiï¿½[ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½B
  */
 session_start();
 $_SESSION['TWITTER_REQUEST_TOKEN'] = serialize($requestToken);
- 
+
 /**
- * (5)ƒŠƒ_ƒCƒŒƒNƒg‚µ‚Ä”FØ‰æ–Ê‚ğ•\¦‚·‚éB
+ * (5)ï¿½ï¿½ï¿½_ï¿½Cï¿½ï¿½ï¿½Nï¿½gï¿½ï¿½ï¿½Ä”Fï¿½Ø‰ï¿½Ê‚ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B
  */
 $redirectUrl = $oauthConfig['authorizeUrl'] . '?oauth_token='
     . $requestToken['oauth_token'];
