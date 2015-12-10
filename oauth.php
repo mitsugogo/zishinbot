@@ -47,11 +47,11 @@ $signingKey = rawurlencode($oauthConfig['consumerSecret']) . '&';
 $authorization['oauth_signature'] =
     base64_encode(hash_hmac('sha1',$signatureBaseString,$signingKey,true));
 
-//�������܂ł�GET��POST�ɂȂ�ȊO�͑O��Ɠ���---------------------------------
+//↑ここまではGETがPOSTになる以外は前回と同じ---------------------------------
 /**
- * (1)���N�G�X�g�g�[�N�����擾���邽�߂�http�w�b�_���쐬
- * GET�Ŏ擾�����Ƃ��Ƃقړ��������A�l���_�u���N�H�[�e�[�V�����ň͂܂�āA
- * �J���}�ŋ�؂��Ă���
+ * (1)リクエストトークンを取得するためのhttpヘッダを作成
+ * GETで取得したときとほぼ同じだが、値がダブルクォーテーションで囲まれて、
+ * カンマで区切られている
  */
 $oauthHeader = 'OAuth ';
 foreach($authorization as $key => $val){
@@ -60,11 +60,11 @@ foreach($authorization as $key => $val){
 $oauthHeader = substr($oauthHeader,0,-1);
 
 /**
- * (2)curl���g�p����POST�Ń��N�G�X�g�g�[�N�����擾�B
- * POST�Ő�قǍ쐬�����w�b�_�ŒʐM���Ă��邾�������A�f�t�H���g�ݒ�̂܂܂���
- * Content-Length: -1,Expect: 100-continue���w�b�_�ɂ��邱�Ƃ�����A
- * ���������twitter�̃T�[�o�[��413 Request Entity Too Large,
- * 417 Expectation Failed�̃G���[���͂��̂œ�̃w�b�_�͏����Ă���
+ * (2)curlを使用してPOSTでリクエストトークンを取得。
+ * POSTで先ほど作成したヘッダで通信しているだけだが、デフォルト設定のままだと
+ * Content-Length: -1,Expect: 100-continueをヘッダにつけることがあり、
+ * そうするとtwitterのサーバーが413 Request Entity Too Large,
+ * 417 Expectation Failedのエラーをはくので二つのヘッダは消してある
  */
 $curl = curl_init();
 curl_setopt($curl, CURLOPT_URL, $oauthConfig['requestTokenUrl']);
@@ -85,8 +85,8 @@ $response = curl_exec($curl);
 var_dump($response);
 
 /**
- * (3)curl���g���Ȃ���������̂ŊȒP�ɏ������X�g���[���Őڑ�����\�[�X��
- * ���Ă����B
+ * (3)curlが使えない環境もあるので簡単に書いたストリームで接続するソースも
+ * つけておく。
  */
 
 /*
@@ -108,13 +108,13 @@ foreach(explode('&',$response) as $v){
 }
 
 /**
- * (4)���N�G�X�g�g�[�N���͂��̌�̏����ŕK�v�Ȃ̂ŃZ�b�V�����Ɋi�[���Ă����B
+ * (4)リクエストトークンはこの後の処理で必要なのでセッションに格納しておく。
  */
 session_start();
 $_SESSION['TWITTER_REQUEST_TOKEN'] = serialize($requestToken);
 
 /**
- * (5)���_�C���N�g���ĔF�؉�ʂ�\������B
+ * (5)リダイレクトして認証画面を表示する。
  */
 $redirectUrl = $oauthConfig['authorizeUrl'] . '?oauth_token='
     . $requestToken['oauth_token'];
